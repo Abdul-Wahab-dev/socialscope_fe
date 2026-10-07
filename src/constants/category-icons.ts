@@ -1,0 +1,45 @@
+import type { LucideIcon } from 'lucide-react';
+import {
+  Baby,
+  Car,
+  Coffee,
+  Cpu,
+  Dumbbell,
+  Gamepad2,
+  GraduationCap,
+  Laugh,
+  Music,
+  Palette,
+  PawPrint,
+  Plane,
+  Shirt,
+  Sofa,
+  Sparkles,
+  Tag,
+  Trophy,
+  UtensilsCrossed,
+  Wallet,
+} from 'lucide-react';
+
+const icons: Record<string, LucideIcon> = {
+  fashion: Shirt,
+  beauty: Sparkles,
+  lifestyle: Coffee,
+  food: UtensilsCrossed,
+  travel: Plane,
+  fitness: Dumbbell,
+  tech: Cpu,
+  gaming: Gamepad2,
+  education: GraduationCap,
+  finance: Wallet,
+  comedy: Laugh,
+  music: Music,
+  parenting: Baby,
+  automotive: Car,
+  sports: Trophy,
+  home: Sofa,
+  pets: PawPrint,
+  art: Palette,
+};
+
+export const categoryIcon = (slug: string): LucideIcon => icons[slug] ?? Tag;

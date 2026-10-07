@@ -1,0 +1,160 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Brand: violet core with a warm fuchsia→orange accent for creator energy */
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-200: #ddd6fe;
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-brand-700: #6d28d9;
+  --color-brand-800: #5b21b6;
+  --color-brand-900: #4c1d95;
+  --color-brand-950: #2e1065;
+
+  --color-accent-400: #f472b6;
+  --color-accent-500: #ec4899;
+  --color-warm-400: #fb923c;
+
+  --color-ink: #0b0a12;
+  --color-canvas: #fafafa;
+
+  --radius-4xl: 2rem;
+
+  --shadow-soft: 0 1px 2px rgb(16 12 32 / 0.04), 0 2px 8px -2px rgb(16 12 32 / 0.06);
+  --shadow-lift: 0 2px 4px rgb(16 12 32 / 0.04), 0 12px 32px -8px rgb(16 12 32 / 0.14);
+  --shadow-glow: 0 10px 40px -10px rgb(124 58 237 / 0.45);
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 7s ease-in-out 1.5s infinite;
+  --animate-fade-up: fade-up 0.6s ease-out both;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-canvas text-zinc-900;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  ::selection {
+    @apply bg-brand-200 text-brand-950;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-600 via-accent-500 to-warm-400 bg-clip-text text-transparent;
+  }
+  .bg-brand-gradient {
+    background-image: linear-gradient(135deg, var(--color-brand-600) 0%, var(--color-accent-500) 60%, var(--color-warm-400) 100%);
+  }
+  /* Faint square grid used behind hero sections */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgb(24 24 27 / 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(24 24 27 / 0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .bg-dots {
+    background-image: radial-gradient(rgb(24 24 27 / 0.12) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+  .mask-fade-b {
+    mask-image: linear-gradient(to bottom, black 55%, transparent);
+  }
+  .mask-fade-x {
+    mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Readable long-form text for legal pages */
+@layer components {
+  .legal-prose h2 {
+    @apply mb-4 text-xl font-semibold tracking-tight text-zinc-950 sm:text-2xl;
+  }
+  .legal-prose h3 {
+    @apply mt-6 mb-2 text-base font-semibold text-zinc-900;
+  }
+  .legal-prose p,
+  .legal-prose li {
+    @apply text-[15px] leading-7 text-zinc-700;
+  }
+  .legal-prose p + p,
+  .legal-prose ul + p,
+  .legal-prose ol + p,
+  .legal-prose table + p {
+    @apply mt-3;
+  }
+  .legal-prose ul {
+    @apply mt-3 list-disc space-y-1.5 pl-5 marker:text-brand-400;
+  }
+  .legal-prose ol {
+    @apply mt-3 list-decimal space-y-1.5 pl-5;
+  }
+  .legal-prose a {
+    @apply font-medium text-brand-700 underline decoration-brand-200 underline-offset-2 hover:decoration-brand-600;
+  }
+  .legal-prose strong {
+    @apply font-semibold text-zinc-900;
+  }
+  .legal-prose table {
+    @apply mt-4 w-full overflow-hidden rounded-xl text-left text-sm ring-1 ring-zinc-200;
+  }
+  .legal-prose th {
+    @apply bg-zinc-50 px-3 py-2 font-semibold text-zinc-900;
+  }
+  .legal-prose td {
+    @apply border-t border-zinc-100 px-3 py-2 align-top text-zinc-700;
+  }
+  .legal-prose .callout {
+    @apply mt-4 rounded-2xl bg-brand-50/70 p-4 text-sm ring-1 ring-brand-100;
+  }
+}
