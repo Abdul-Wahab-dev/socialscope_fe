@@ -39,7 +39,7 @@ async function getHomeData() {
   const opts = { next: { revalidate: 300 } };
   const [featured, stats, config, categories] = await Promise.all([
     serverFetch<CreatorCardData[]>("/creators/featured?limit=8", opts).catch(
-      () => [],
+      () => []
     ),
     serverFetch<PublicStats>("/meta/stats", opts).catch(() => null),
     serverFetch<PublicConfig>("/meta/config", opts).catch(() => null),
@@ -53,7 +53,7 @@ async function getHomeData() {
 const faqs = (c: PublicConfig | null) => [
   {
     q: "Where do the creator stats come from?",
-    a: "Creators connect their Instagram, TikTok and YouTube accounts through each platform’s official login. We read followers, views, likes and comments directly from the platform and refresh them automatically every 12 hours. Nothing is self-reported.",
+    a: "Creators connect their Instagram, TikTok, YouTube and Facebook accounts through each platform’s official login. For Instagram, TikTok and YouTube we read followers, views, likes and comments directly from the platform and refresh them every 12 hours. Facebook doesn’t share profile stats with apps, so Facebook login verifies the account owner and the creator adds the numbers, clearly labelled “Self-reported”.",
   },
   {
     q: "Is it free for brands?",
@@ -73,7 +73,7 @@ const faqs = (c: PublicConfig | null) => [
   },
   {
     q: "Which platforms are supported?",
-    a: "Instagram (Creator or Business accounts), TikTok and YouTube. More platforms are on the roadmap.",
+    a: "Instagram (Creator or Business accounts), TikTok, YouTube and Facebook profiles (with self-reported stats). More platforms are on the roadmap.",
   },
   {
     q: "Can a creator list someone else’s account?",
@@ -86,7 +86,7 @@ export default async function HomePage() {
   const topCategories = [...categories].sort(
     (a, b) =>
       (stats?.categoryCounts[b.slug] ?? 0) -
-      (stats?.categoryCounts[a.slug] ?? 0),
+      (stats?.categoryCounts[a.slug] ?? 0)
   );
   const founding = (config?.foundingSlotsRemaining ?? 0) > 0;
 
@@ -118,6 +118,11 @@ export default async function HomePage() {
                 />
                 <PlatformBadge
                   platform="youtube"
+                  size={16}
+                  className="!rounded-full ring-2 ring-white"
+                />
+                <PlatformBadge
+                  platform="facebook"
                   size={16}
                   className="!rounded-full ring-2 ring-white"
                 />
@@ -214,7 +219,7 @@ export default async function HomePage() {
                   icon: BarChart3,
                 },
                 { label: "Countries", value: stats.countries, icon: Sparkles },
-                { label: "Platforms connected", value: 3, icon: Link2 },
+                { label: "Platforms connected", value: 4, icon: Link2 },
               ].map(({ label, value, icon: Icon }) => (
                 <div key={label} className="bg-white p-6 sm:p-8">
                   <Icon className="h-5 w-5 text-brand-500" aria-hidden />
@@ -279,7 +284,7 @@ export default async function HomePage() {
                       {
                         icon: Link2,
                         title: "Connect your accounts",
-                        body: "Log in with Instagram, TikTok or YouTube. Your stats import instantly and stay up to date.",
+                        body: "Log in with Instagram, TikTok, YouTube or Facebook. Your stats import instantly and stay up to date.",
                       },
                       {
                         icon: Wallet,
@@ -479,7 +484,7 @@ export default async function HomePage() {
                 <ul className="mt-8 space-y-3 text-[15px] text-zinc-200">
                   {[
                     "Public media kit link for your bio",
-                    "Stats sync automatically from Instagram, TikTok & YouTube",
+                    "Stats sync automatically from Instagram, TikTok & YouTube, plus Facebook",
                     "Rate card and portfolio brands see before they reach out",
                     "Accept, decline or counter-offer every request",
                     "See how often you appear in brand searches",
@@ -625,7 +630,7 @@ export default async function HomePage() {
                   ? "Free"
                   : formatMoney(
                       config?.creatorRegistrationFeeCents ?? 300,
-                      config?.currency,
+                      config?.currency
                     )
               }
               suffix={founding ? "for early creators" : "one-time"}
@@ -636,7 +641,7 @@ export default async function HomePage() {
               }
               features={[
                 "Public media kit with live stats",
-                "Instagram, TikTok & YouTube sync",
+                "Instagram, TikTok & YouTube sync + Facebook",
                 "Rate card & portfolio",
                 "Collab inbox with counter-offers",
                 "Profile views & search insights",
@@ -839,7 +844,7 @@ function PriceCard({
         className={buttonClasses(
           highlighted ? "gradient" : "dark",
           "lg",
-          "mt-8 w-full",
+          "mt-8 w-full"
         )}
       >
         {cta.label}

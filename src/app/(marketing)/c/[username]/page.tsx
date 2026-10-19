@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { serverFetch } from "@/lib/server-api";
 import { AppError } from "@/lib/api-error";
-import { countryName, DELIVERABLES } from "@/constants/options";
+import { countryName, DELIVERABLES, hasPublicStats } from "@/constants/options";
 import {
   formatCompact,
   formatDate,
@@ -40,8 +40,8 @@ import {
   platformLabel,
 } from "@/components/creators/platform-badge";
 import { CreatorActions } from "@/components/creators/creator-actions";
-import { Stat } from "@/components/creators/stat";
 import { SocialProfileLink } from "@/components/creators/social-profile-link";
+import { Stat } from "@/components/creators/stat";
 
 type Params = { params: Promise<{ username: string }> };
 
@@ -97,14 +97,16 @@ export default async function CreatorPublicPage({ params }: Params) {
   const location = [creator.city, countryName(creator.country)]
     .filter(Boolean)
     .join(", ");
-  const withViews = creator.socialAccounts.filter((a) => a.avgViews > 0);
+  const accounts = creator.socialAccounts.filter(hasPublicStats);
+  const apiAccounts = accounts.filter((a) => a.statsSource !== "self_reported");
+  const withViews = accounts.filter((a) => a.avgViews > 0);
   const totalViews = withViews.length
     ? Math.round(
         withViews.reduce((s, a) => s + a.avgViews, 0) / withViews.length
       )
     : 0;
   const lastSync =
-    creator.socialAccounts
+    apiAccounts
       .map((a) => a.lastSyncedAt)
       .filter(Boolean)
       .sort()
@@ -181,7 +183,7 @@ export default async function CreatorPublicPage({ params }: Params) {
                 displayName: creator.displayName,
                 isAvailable: creator.isAvailable,
                 isOwnerPreview: creator.isOwnerPreview,
-                platforms: creator.socialAccounts.map((a) => a.platform),
+                platforms: accounts.map((a) => a.platform),
               }}
             />
           </div>
@@ -225,17 +227,21 @@ export default async function CreatorPublicPage({ params }: Params) {
 
             <Card>
               <CardHeader
-                title="Verified social accounts"
-                description={`Pulled from each platform’s official API · updated ${timeAgo(lastSync)}`}
+                title="Social accounts"
+                description={
+                  apiAccounts.length
+                    ? `Verified stats come from each platform’s official API · updated ${timeAgo(lastSync)}${apiAccounts.length < accounts.length ? ". Self-reported stats were entered by the creator." : ""}`
+                    : "Self-reported stats were entered by the creator; account ownership is verified by login."
+                }
                 icon={<ShieldCheck />}
               />
               <CardBody className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {creator.socialAccounts.length === 0 && (
+                {accounts.length === 0 && (
                   <p className="text-sm text-zinc-500">
                     No accounts connected yet.
                   </p>
                 )}
-                {creator.socialAccounts.map((a) => (
+                {accounts.map((a) => (
                   <div
                     key={a.id}
                     className="rounded-2xl bg-zinc-50 p-5 ring-1 ring-zinc-200/70"
@@ -243,8 +249,14 @@ export default async function CreatorPublicPage({ params }: Params) {
                     <div className="flex items-center gap-3">
                       <PlatformBadge platform={a.platform} size={40} />
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-zinc-950">
+                        <p className="flex items-center gap-1.5 text-sm font-semibold text-zinc-950">
                           {platformLabel(a.platform)}
+                          {a.statsSource !== "self_reported" && (
+                            <BadgeCheck
+                              className="h-4 w-4 shrink-0 text-brand-500"
+                              aria-label="Verified stats"
+                            />
+                          )}
                         </p>
                         {a.profileUrl ? (
                           <SocialProfileLink
@@ -262,6 +274,15 @@ export default async function CreatorPublicPage({ params }: Params) {
                           </p>
                         )}
                       </div>
+                      {a.statsSource === "self_reported" && (
+                        <Badge
+                          tone="warning"
+                          className="ml-auto shrink-0 whitespace-nowrap"
+                          title={`Account ownership verified by Facebook login. Stats entered by the creator ${timeAgo(a.statsReportedAt)}.`}
+                        >
+                          Self-reported
+                        </Badge>
+                      )}
                     </div>
                     <p className="mt-5 text-3xl font-semibold tracking-tight text-zinc-950 tabular-nums">
                       {formatCompact(a.followers)}
@@ -271,7 +292,10 @@ export default async function CreatorPublicPage({ params }: Params) {
                       {[
                         ["Eng.", formatPercent(a.engagementRate)],
                         ["Views", a.avgViews ? formatCompact(a.avgViews) : "—"],
-                        ["Posts", formatCompact(a.postsCount)],
+                        [
+                          "Posts",
+                          a.postsCount ? formatCompact(a.postsCount) : "—",
+                        ],
                       ].map(([k, v]) => (
                         <div key={k}>
                           <dt className="text-[11px] text-zinc-500">{k}</dt>

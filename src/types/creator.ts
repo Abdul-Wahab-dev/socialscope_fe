@@ -1,5 +1,15 @@
-export type SocialPlatform = 'instagram' | 'tiktok' | 'youtube';
-export type DeliverableType = 'post' | 'reel' | 'story' | 'video' | 'short' | 'live' | 'ugc' | 'other';
+export type SocialPlatform = "instagram" | "tiktok" | "youtube" | "facebook";
+/** 'api' = pulled from the platform; 'self_reported' = entered by the creator (Facebook) */
+export type StatsSource = "api" | "self_reported";
+export type DeliverableType =
+  | "post"
+  | "reel"
+  | "story"
+  | "video"
+  | "short"
+  | "live"
+  | "ugc"
+  | "other";
 
 export interface Category {
   slug: string;
@@ -20,7 +30,10 @@ export interface SocialAccount {
   avgLikes: number;
   avgComments: number;
   engagementRate: number;
-  syncStatus?: 'pending' | 'ok' | 'error';
+  statsSource: StatsSource;
+  /** When a self-reported account's stats were last entered (null until the creator adds them) */
+  statsReportedAt: string | null;
+  syncStatus?: "pending" | "ok" | "error";
   syncError?: string | null;
   lastSyncedAt: string | null;
 }
@@ -74,7 +87,14 @@ export interface CreatorProfile {
   listingChecklist: ListingChecklist;
 }
 
-export type PublicCreatorProfile = Omit<CreatorProfile, 'contactEmail' | 'listedAt' | 'profileViews' | 'searchAppearances' | 'listingChecklist'> & {
+export type PublicCreatorProfile = Omit<
+  CreatorProfile,
+  | "contactEmail"
+  | "listedAt"
+  | "profileViews"
+  | "searchAppearances"
+  | "listingChecklist"
+> & {
   isOwnerPreview: boolean;
   createdAt: string;
 };
@@ -95,7 +115,10 @@ export interface CreatorCardData {
   avgEngagementRate: number;
   minPriceCents: number | null;
   isSaved?: boolean;
-  socialAccounts: Pick<SocialAccount, 'platform' | 'handle' | 'followers' | 'engagementRate' | 'avgViews'>[];
+  socialAccounts: Pick<
+    SocialAccount,
+    "platform" | "handle" | "followers" | "engagementRate" | "avgViews"
+  >[];
 }
 
 export interface CreatorInsights {
@@ -103,5 +126,10 @@ export interface CreatorInsights {
   searchAppearances: number;
   totalFollowers: number;
   avgEngagementRate: number;
-  history: { platform: SocialPlatform; followers: number; engagementRate: number; capturedAt: string }[];
+  history: {
+    platform: SocialPlatform;
+    followers: number;
+    engagementRate: number;
+    capturedAt: string;
+  }[];
 }
