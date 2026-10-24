@@ -5,7 +5,7 @@ const points = [
   {
     icon: BadgeCheck,
     title: "Verified stats",
-    body: "Numbers come straight from Instagram, TikTok, YouTube and Facebook.",
+    body: "Instagram, TikTok and YouTube numbers come straight from the platform. Facebook stats are labelled self-reported.",
   },
   {
     icon: LineChart,

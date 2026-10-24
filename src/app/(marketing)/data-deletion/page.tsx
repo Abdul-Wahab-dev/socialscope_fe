@@ -72,7 +72,8 @@ const sections: LegalSection[] = [
             <ExtLink href={x.googleSecurityPermissions}>
               Google security settings page
             </ExtLink>
-            . Data we can no longer refresh is deleted within 30 days.
+            . We can then no longer refresh your YouTube data, and it is deleted
+            automatically within 7 days.
           </li>
           <li>
             <strong>Facebook:</strong> Facebook → Settings &amp; privacy →
@@ -82,8 +83,9 @@ const sections: LegalSection[] = [
           </li>
           <li>
             <strong>TikTok:</strong> TikTok app → Settings and privacy →
-            Security → <em>Apps and services</em> → remove {APP}. Data we can no
-            longer refresh is deleted within 30 days.
+            Security → <em>Apps and services</em> → remove {APP}. We can then no
+            longer refresh your TikTok data, and it is deleted automatically
+            within 7 days.
           </li>
         </ul>
       </>
@@ -132,7 +134,10 @@ const sections: LegalSection[] = [
           Payment records held by our payment processor, Stripe, as required by
           financial regulations.
         </li>
-        <li>Encrypted backups, which are overwritten within 30 days.</li>
+        <li>
+          Encrypted database backups, which are not used for any other purpose
+          and are overwritten within 7 days.
+        </li>
         <li>
           Messages you sent to other users may remain in copies those users
           already received, such as email notifications.

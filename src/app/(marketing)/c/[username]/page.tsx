@@ -152,10 +152,12 @@ export default async function CreatorPublicPage({ params }: Params) {
                   <h1 className="text-3xl font-semibold tracking-tight text-zinc-950">
                     {creator.displayName}
                   </h1>
-                  <BadgeCheck
-                    className="h-6 w-6 text-brand-500"
-                    aria-label="Verified stats"
-                  />
+                  {apiAccounts.length > 0 && (
+                    <BadgeCheck
+                      className="h-6 w-6 text-brand-500"
+                      aria-label="Verified stats"
+                    />
+                  )}
                 </div>
                 <p className="text-zinc-500">@{creator.username}</p>
                 <div className="flex flex-wrap gap-2">

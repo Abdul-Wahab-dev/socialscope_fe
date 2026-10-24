@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -47,6 +48,8 @@ export function CreatorOverview() {
   const insights = useCreatorInsights();
   const config = usePublicConfig();
   const checkout = useCheckout();
+  /** Explicit agreement that the profile and stats become public (sent to the API with go-live) */
+  const [publishConsent, setPublishConsent] = useState(false);
 
   if (profile.isPending)
     return (
@@ -133,20 +136,47 @@ export function CreatorOverview() {
             )}
           </div>
           {!p.isListed && (
-            <Button
-              variant="gradient"
-              size="lg"
-              onClick={() =>
-                checkout.mutate({ purpose: "creator_registration" })
-              }
-              loading={checkout.isPending}
-              disabled={!p.listingChecklist.ready}
-            >
-              <Rocket className="h-4 w-4" />
-              {founding
-                ? "Go live for free"
-                : `Pay ${formatMoney(config.data?.creatorRegistrationFeeCents ?? 0, config.data?.currency)} & go live`}
-            </Button>
+            <div className="flex max-w-sm flex-col gap-3 lg:items-end">
+              <label className="flex items-start gap-2.5 text-xs leading-relaxed text-zinc-300">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded accent-brand-500"
+                  checked={publishConsent}
+                  onChange={(e) => setPublishConsent(e.target.checked)}
+                />
+                <span>
+                  I understand that going live makes my profile public and
+                  searchable by brands, including my connected accounts’ handles
+                  and statistics (Facebook stats are shown as self-reported), my
+                  rates and my portfolio. I can disconnect accounts or delete my
+                  profile at any time. See the{" "}
+                  <Link
+                    href="/privacy#public-information"
+                    className="font-medium text-white underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </label>
+              <Button
+                variant="gradient"
+                size="lg"
+                onClick={() =>
+                  checkout.mutate({
+                    purpose: "creator_registration",
+                    publishConsent: true,
+                  })
+                }
+                loading={checkout.isPending}
+                disabled={!p.listingChecklist.ready || !publishConsent}
+              >
+                <Rocket className="h-4 w-4" />
+                {founding
+                  ? "Go live for free"
+                  : `Pay ${formatMoney(config.data?.creatorRegistrationFeeCents ?? 0, config.data?.currency)} & go live`}
+              </Button>
+            </div>
           )}
         </div>
       </section>

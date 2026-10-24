@@ -117,7 +117,12 @@ export interface CreatorCardData {
   isSaved?: boolean;
   socialAccounts: Pick<
     SocialAccount,
-    "platform" | "handle" | "followers" | "engagementRate" | "avgViews"
+    | "platform"
+    | "handle"
+    | "followers"
+    | "engagementRate"
+    | "avgViews"
+    | "statsSource"
   >[];
 }
 

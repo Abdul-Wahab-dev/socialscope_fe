@@ -7,6 +7,7 @@ import {
   LegalPage,
   type LegalSection,
 } from "@/components/legal/legal-page";
+import { LegalContact, operatorLine } from "@/components/legal/legal-contact";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -24,8 +25,7 @@ const sections: LegalSection[] = [
         <p>
           {APP} (“{APP}”, “we”, “us”) is an online marketplace that helps brands
           discover content creators and send them paid collaboration requests.
-          The service is operated by <strong>{L.companyName}</strong>,{" "}
-          {L.address}.
+          The service is operated by {operatorLine()}.
         </p>
         <p>
           This Privacy Policy explains what information we collect when you use
@@ -243,17 +243,25 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
+          Nothing about a creator is public until they activate their listing.
+          Before going live, creators must confirm that they agree to publish
+          the information below, and we record the date of that agreement.
+        </p>
+        <p>
           Once a creator activates their listing, their media kit at{" "}
           <code>/c/username</code> is publicly accessible and appears in search.
           It shows the display name, username, bio, profile picture, categories,
           languages, city and country, availability, connected-account handles
-          and statistics, rate card and portfolio.
+          and statistics (followers, average views, likes and comments,
+          engagement rate and number of posts), rate card and portfolio.
+          Facebook statistics are entered by the creator and are labelled
+          “Self-reported”.
         </p>
         <p>
-          Your email address, business contact email, messages, payment history
-          and social access tokens are <strong>never</strong> public. Brand
-          profiles are visible only to creators who receive a request from that
-          brand.
+          Your email address, business contact email, messages, payment history,
+          social access tokens and platform account IDs are{" "}
+          <strong>never</strong> public. Brand profiles are visible only to
+          creators who receive a request from that brand.
         </p>
       </>
     ),
@@ -317,11 +325,30 @@ const sections: LegalSection[] = [
           <ExtLink href={x.googleSecurityPermissions}>
             Google security settings page
           </ExtLink>
-          , or by disconnecting YouTube in your {APP} dashboard. When you revoke
-          access, disconnect or ask us to delete your data, we delete the
-          YouTube data we store within 7 days of a deletion request, and in any
-          case within 30 days of access being revoked. Stored YouTube data that
-          we can no longer refresh is deleted automatically after 30 days.
+          , or by disconnecting YouTube in your {APP} dashboard. How quickly we
+          delete the YouTube data we store:
+        </p>
+        <ul>
+          <li>
+            <strong>You disconnect YouTube or delete your account:</strong>{" "}
+            immediately.
+          </li>
+          <li>
+            <strong>You ask us to delete it by email:</strong> as soon as
+            possible and within 7 days of your request.
+          </li>
+          <li>
+            <strong>
+              You revoke access on the Google security settings page:
+            </strong>{" "}
+            we can no longer refresh the data, and it is deleted automatically
+            within 7 days of the revocation.
+          </li>
+        </ul>
+        <p>
+          While YouTube is connected we refresh its data about every 12 hours,
+          and data that can no longer be refreshed is never kept for more than 7
+          days.
         </p>
 
         <h3>Instagram (Meta)</h3>
@@ -449,8 +476,11 @@ const sections: LegalSection[] = [
         <li>
           <strong>Connected-account data:</strong> refreshed about every 12
           hours while connected. Deleted immediately when you disconnect the
-          account, and automatically if it cannot be refreshed for 30 days (for
-          example, because you revoked access).
+          account or delete your account, and within 7 days of a deletion
+          request by email. If you revoke our access on the platform, the data
+          can no longer be refreshed and is deleted automatically within 7 days.
+          Facebook stats you entered yourself are kept until you disconnect
+          Facebook, remove {APP} on Facebook, or delete your account.
         </li>
         <li>
           <strong>Search logs:</strong> up to 12 months.
@@ -464,8 +494,9 @@ const sections: LegalSection[] = [
           (no personal content) to prove a deletion request was honored.
         </li>
         <li>
-          <strong>Backups:</strong> deleted data may persist in encrypted
-          backups for up to 30 days before being overwritten.
+          <strong>Backups:</strong> deleted data may remain in encrypted
+          database backups, which are not used for any other purpose and are
+          overwritten within 7 days.
         </li>
       </ul>
     ),
@@ -494,6 +525,7 @@ const sections: LegalSection[] = [
             <strong>Delete:</strong> delete your account from{" "}
             <em>Dashboard → Settings → Delete account</em>, or follow the steps
             on our <Link href="/data-deletion">Data Deletion page</Link>.
+            Deletion requests sent by email are completed within 7 days.
           </li>
           <li>
             <strong>Export or other requests:</strong> email{" "}
@@ -566,16 +598,7 @@ const sections: LegalSection[] = [
   {
     id: "contact",
     title: "Contact us",
-    content: (
-      <p>
-        {L.companyName}
-        <br />
-        {L.address}
-        <br />
-        Privacy questions or complaints:{" "}
-        <a href={`mailto:${L.privacyEmail}`}>{L.privacyEmail}</a>
-      </p>
-    ),
+    content: <LegalContact />,
   },
 ];
 

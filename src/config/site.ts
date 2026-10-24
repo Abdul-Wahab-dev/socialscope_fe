@@ -19,7 +19,7 @@ import { env } from "./env";
 export const siteConfig = {
   name: env.appName,
   description:
-    "Find verified content creators for paid collaborations — real stats from connected Instagram, TikTok, YouTube and Facebook accounts.",
+    "Find content creators for paid collaborations — verified stats from connected Instagram, TikTok and YouTube accounts, plus clearly labelled Facebook stats.",
 };
 
 export interface NavItem {

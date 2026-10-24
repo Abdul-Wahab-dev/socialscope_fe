@@ -7,6 +7,7 @@ import {
   LegalPage,
   type LegalSection,
 } from "@/components/legal/legal-page";
+import { LegalContact } from "@/components/legal/legal-contact";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -354,15 +355,7 @@ const sections: LegalSection[] = [
   {
     id: "contact",
     title: "Contact",
-    content: (
-      <p>
-        {L.companyName}
-        <br />
-        {L.address}
-        <br />
-        <a href={`mailto:${L.supportEmail}`}>{L.supportEmail}</a>
-      </p>
-    ),
+    content: <LegalContact />,
   },
 ];
 

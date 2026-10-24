@@ -7,10 +7,15 @@ import { env } from "./env";
 export const legalConfig = {
   /** Registered business / sole-proprietor name */
   companyName: process.env.NEXT_PUBLIC_LEGAL_COMPANY || `${env.appName}`,
-  /** Postal address (required by several app reviews) */
-  address:
-    process.env.NEXT_PUBLIC_LEGAL_ADDRESS ||
-    "[Street address], Lahore, Punjab, Pakistan",
+  /**
+   * Full postal address. Optional: shown only when set (NEXT_PUBLIC_LEGAL_ADDRESS).
+   * Never ship a placeholder here; reviewers treat it as an unfinished policy.
+   */
+  address: process.env.NEXT_PUBLIC_LEGAL_ADDRESS?.trim() || "",
+  /** Always shown: where the operator is based */
+  location:
+    process.env.NEXT_PUBLIC_LEGAL_LOCATION?.trim() ||
+    "Lahore, Punjab, Pakistan",
   privacyEmail:
     process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "privacy@socialscope.co",
   supportEmail:
@@ -18,7 +23,7 @@ export const legalConfig = {
   governingLaw: "the laws of the Islamic Republic of Pakistan",
   courts:
     process.env.NEXT_PUBLIC_LEGAL_COURTS || "the courts of Lahore, Pakistan",
-  effectiveDate: "28 September 2026",
+  effectiveDate: "21 October 2026",
   minimumAge: 18,
 } as const;
 

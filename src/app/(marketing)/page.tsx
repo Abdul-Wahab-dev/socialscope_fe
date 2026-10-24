@@ -259,7 +259,7 @@ export default async function HomePage() {
                       {
                         icon: BarChart3,
                         title: "Compare real stats",
-                        body: "Every number is pulled from the creator’s connected account and refreshed automatically, including follower history.",
+                        body: "Instagram, TikTok and YouTube numbers are pulled from the creator’s connected account and refreshed automatically, including follower history. Facebook numbers are labelled self-reported.",
                       },
                       {
                         icon: Handshake,
@@ -337,8 +337,8 @@ export default async function HomePage() {
             <BentoTile
               className="md:col-span-2"
               icon={ShieldCheck}
-              title="Verified, not self-reported"
-              body="Stats come from official APIs. Each social account can belong to one creator only."
+              title="Verified where platforms allow it"
+              body="Instagram, TikTok and YouTube stats come from official APIs. Facebook doesn’t share profile stats, so those are entered by the creator and labelled self-reported. Each account can belong to one creator only."
             />
             <BentoTile
               className="md:col-span-2"
