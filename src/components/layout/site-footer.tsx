@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { siteConfig } from "@/config/site";
 import { routes } from "@/constants/routes";
-import { Logo } from "./logo";
+import { LogoFooter } from "./logo";
 
 const columns = [
   {
@@ -48,7 +48,7 @@ export function SiteFooter() {
       <div className="relative mx-auto max-w-7xl px-4 pt-16 pb-10 sm:px-6 lg:px-8">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div className="max-w-sm">
-            <Logo inverted />
+            <LogoFooter />
             <p className="mt-4 text-sm leading-relaxed">
               {siteConfig.description}
             </p>
