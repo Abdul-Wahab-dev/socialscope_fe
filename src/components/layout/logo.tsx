@@ -54,7 +54,7 @@ export function Logo({
       <Image
         src={"/logo/socialscope-logo-horizontal.png"}
         alt="socialscope.co"
-        width={250}
+        width={180}
         height={100}
         loading="eager"
         style={{
