@@ -19,6 +19,7 @@ const ANDROID_PACKAGES: Record<SocialPlatform, string> = {
   instagram: "com.instagram.android",
   tiktok: "com.zhiliaoapp.musically",
   youtube: "com.google.android.youtube",
+  facebook: "com.facebook.katana",
 };
 
 /** Web profile URL used as the fallback everywhere. */
@@ -31,15 +32,17 @@ export function profileWebUrl(
   const h = handle.replace(/^@/, "");
   if (platform === "instagram") return `https://www.instagram.com/${h}/`;
   if (platform === "tiktok") return `https://www.tiktok.com/@${h}`;
+  if (platform === "facebook") return `https://www.facebook.com/${h}`;
   return `https://www.youtube.com/@${h}`;
 }
 
 /**
  * Opens a creator's profile in the native app on phones, falling back to the website.
- * - Android: intent:// URL with the app's package; Chrome opens the app, or
- *   browser_fallback_url when it isn't installed.
- * - iOS: Instagram/YouTube custom schemes with a timed fallback to the web URL;
- *   TikTok uses its https universal link (opens the app when installed).
+ * - Android: an intent:// URL with the app's package; Chrome opens the app, or the
+ *   browser_fallback_url when the app isn't installed. No timers needed.
+ * - iOS: Instagram/YouTube custom schemes, with a short timer that falls back to the
+ *   web URL if the app didn't open. TikTok and Facebook use their https universal links (opens the app
+ *   when installed, otherwise the website).
  * - Desktop: a normal new tab.
  */
 export function openSocialProfile(
@@ -66,13 +69,13 @@ export function openSocialProfile(
         ? `instagram://user?username=${encodeURIComponent(h)}`
         : platform === "youtube"
           ? `youtube://${web.replace(/^https?:\/\//, "")}`
-          : null; // TikTok: universal link is the reliable route
+          : null; // TikTok/Facebook: universal link below is the reliable route
 
     if (!scheme) {
       window.location.href = web;
       return;
     }
-    // If the app opens, the page gets hidden and we cancel the fallback.
+    // If the app opens, the page is hidden and we cancel the fallback.
     const fallback = window.setTimeout(() => {
       if (document.visibilityState === "visible") window.location.href = web;
     }, 1200);

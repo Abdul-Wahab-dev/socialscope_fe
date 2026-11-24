@@ -4,8 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useApiQuery, useApiMutation, useQueryCache } from "@/lib/query";
 import { toast } from "sonner";
-import { AlertTriangle, Loader2, RefreshCw, Unlink } from "lucide-react";
-import { PLATFORMS } from "@/constants/options";
+import {
+  AlertTriangle,
+  Loader2,
+  PencilLine,
+  RefreshCw,
+  Unlink,
+} from "lucide-react";
+import { PLATFORMS, SELF_REPORTED_PLATFORMS } from "@/constants/options";
 import { queryKeys } from "@/constants/query-keys";
 import { usePublicConfig } from "@/hooks/use-meta";
 import { formatCompact, formatPercent, timeAgo } from "@/lib/utils";
@@ -32,6 +38,14 @@ import {
   PlatformBadge,
   platformLabel,
 } from "@/components/creators/platform-badge";
+import { SelfReportedStatsDialog } from "./self-reported-stats-dialog";
+
+/**
+ * Platforms whose mobile app can finish a website login. These get a direct tap-link so
+ * the phone can hand the login to the app. Instagram's app can't: it bounces back with a
+ * "Complete action using…" chooser, so Instagram's login stays in the browser.
+ */
+const APP_LOGIN_PLATFORMS = new Set<SocialPlatform>(["tiktok"]);
 
 export function SocialAccountsView() {
   const queryCache = useQueryCache();
@@ -42,6 +56,15 @@ export function SocialAccountsView() {
   const [connecting, setConnecting] = useState<SocialPlatform | null>(null);
   const [confirmDisconnect, setConfirmDisconnect] =
     useState<SocialAccount | null>(null);
+  const [editingStats, setEditingStats] = useState<SocialAccount | null>(null);
+  /** Right after a Facebook connect (?connected=facebook) the stats form opens by itself, once */
+  const [askStatsFor] = useState(() => {
+    const connected = searchParams.get("connected") as SocialPlatform | null;
+    return connected && SELF_REPORTED_PLATFORMS.has(connected)
+      ? connected
+      : null;
+  });
+  const [autoAskDismissed, setAutoAskDismissed] = useState(false);
   const handled = useRef(false);
 
   const accounts = useApiQuery({
@@ -64,15 +87,25 @@ export function SocialAccountsView() {
     if (!connected && !error) return;
     handled.current = true;
     if (connected) {
-      toast.success(
-        `${platformLabel(connected as SocialPlatform)} connected. Stats imported!`
-      );
+      const platform = connected as SocialPlatform;
+      if (SELF_REPORTED_PLATFORMS.has(platform)) {
+        toast.success(
+          `${platformLabel(platform)} profile verified. Now add your stats.`
+        );
+      } else
+        toast.success(`${platformLabel(platform)} connected. Stats imported!`);
       invalidateAll();
     } else if (error) toast.error(error);
     router.replace(pathname);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  /**
+   * Pre-fetch each platform's OAuth URL so "Connect" is a plain link the user taps.
+   * Mobile OSes only hand a link to an installed app (Universal/App Links) on a direct
+   * tap, not after an async API call, so fetching on click always stayed in the browser.
+   * The signed `state` inside the URL is valid for 10 minutes; refresh every 8.
+   */
   const connectUrls = useApiQuery({
     queryKey: ["social", "connect-urls"],
     queryFn: async () =>
@@ -91,6 +124,7 @@ export function SocialAccountsView() {
     refetchInterval: 8 * 60_000,
   });
 
+  // Fallback when the prepared URL isn't ready yet (or failed): fetch on click as before
   const connect = async (platform: SocialPlatform) => {
     try {
       setConnecting(platform);
@@ -133,6 +167,15 @@ export function SocialAccountsView() {
     );
 
   const byPlatform = new Map(accounts.data.map((a) => [a.platform, a]));
+  const justConnected =
+    askStatsFor && !autoAskDismissed ? byPlatform.get(askStatsFor) : undefined;
+  const statsDialogAccount =
+    editingStats ??
+    (justConnected && !justConnected.statsReportedAt ? justConnected : null);
+  const closeStatsDialog = () => {
+    setEditingStats(null);
+    setAutoAskDismissed(true);
+  };
 
   return (
     <>
@@ -159,8 +202,19 @@ export function SocialAccountsView() {
                     <p className="font-medium">{label}</p>
                     {account ? (
                       <p className="truncate text-sm text-zinc-500">
-                        @{account.handle} · synced{" "}
-                        {timeAgo(account.lastSyncedAt)}
+                        {account.statsSource === "self_reported" ? (
+                          <>
+                            {account.handle} ·{" "}
+                            {account.statsReportedAt
+                              ? `stats updated ${timeAgo(account.statsReportedAt)}`
+                              : "profile verified"}
+                          </>
+                        ) : (
+                          <>
+                            @{account.handle} · synced{" "}
+                            {timeAgo(account.lastSyncedAt)}
+                          </>
+                        )}
                       </p>
                     ) : (
                       <p className="text-sm text-zinc-500">Not connected</p>
@@ -168,44 +222,66 @@ export function SocialAccountsView() {
                   </div>
                 </div>
 
-                {account && (
-                  <dl className="grid grid-cols-3 gap-4 text-center text-sm">
-                    <div>
-                      <dt className="text-xs text-zinc-500">Followers</dt>
-                      <dd className="font-semibold">
-                        {formatCompact(account.followers)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-zinc-500">Engagement</dt>
-                      <dd className="font-semibold">
-                        {formatPercent(account.engagementRate)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-zinc-500">Avg views</dt>
-                      <dd className="font-semibold">
-                        {account.avgViews
-                          ? formatCompact(account.avgViews)
-                          : "—"}
-                      </dd>
-                    </div>
-                  </dl>
-                )}
+                {account?.statsSource === "self_reported" &&
+                  !account.statsReportedAt && (
+                    <p className="text-sm text-amber-700 sm:text-right">
+                      Add your stats to show this account on your profile.
+                    </p>
+                  )}
+
+                {account &&
+                  (account.statsSource !== "self_reported" ||
+                    account.statsReportedAt) && (
+                    <dl className="grid grid-cols-3 gap-4 text-center text-sm">
+                      <div>
+                        <dt className="text-xs text-zinc-500">Followers</dt>
+                        <dd className="font-semibold">
+                          {formatCompact(account.followers)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-zinc-500">Engagement</dt>
+                        <dd className="font-semibold">
+                          {formatPercent(account.engagementRate)}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-xs text-zinc-500">Avg views</dt>
+                        <dd className="font-semibold">
+                          {account.avgViews
+                            ? formatCompact(account.avgViews)
+                            : "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  )}
 
                 <div className="flex gap-2">
                   {account ? (
                     <>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        loading={
-                          sync.isPending && sync.variables === account.id
-                        }
-                        onClick={() => sync.mutate(account.id)}
-                      >
-                        <RefreshCw className="h-4 w-4" /> Refresh
-                      </Button>
+                      {account.statsSource === "self_reported" ? (
+                        <Button
+                          variant={
+                            account.statsReportedAt ? "secondary" : "primary"
+                          }
+                          size="sm"
+                          onClick={() => setEditingStats(account)}
+                        >
+                          <PencilLine className="h-4 w-4" />{" "}
+                          {account.statsReportedAt ? "Edit stats" : "Add stats"}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          loading={
+                            sync.isPending && sync.variables === account.id
+                          }
+                          onClick={() => sync.mutate(account.id)}
+                        >
+                          <RefreshCw className="h-4 w-4" /> Refresh
+                        </Button>
+                      )}
                       <Button
                         variant="outlineDanger"
                         size="sm"
@@ -215,7 +291,8 @@ export function SocialAccountsView() {
                         <Unlink className="h-4 w-4" />
                       </Button>
                     </>
-                  ) : connectUrls.data?.[platform] ? (
+                  ) : APP_LOGIN_PLATFORMS.has(platform) &&
+                    connectUrls.data?.[platform] ? (
                     <a
                       href={connectUrls.data[platform]!}
                       onClick={() => setConnecting(platform)}
@@ -253,9 +330,12 @@ export function SocialAccountsView() {
       </div>
 
       <p className="mt-4 text-xs text-zinc-500">
-        Instagram requires a Professional (Creator or Business) account. Stats
-        refresh automatically every 12 hours; manual refresh is limited to once
-        per hour. By connecting YouTube you agree to the{" "}
+        Instagram requires a Professional (Creator or Business) account.
+        Facebook login verifies that the profile is yours; Facebook doesn’t
+        share profile stats with apps, so you add them yourself and they’re
+        shown as “Self-reported”. Other platforms’ stats refresh automatically
+        every 12 hours; manual refresh is limited to once per hour. By
+        connecting YouTube you agree to the{" "}
         <a
           href="https://www.youtube.com/t/terms"
           target="_blank"
@@ -270,6 +350,12 @@ export function SocialAccountsView() {
         </a>{" "}
         for what we read and how to revoke access.
       </p>
+
+      <SelfReportedStatsDialog
+        account={statsDialogAccount}
+        onClose={closeStatsDialog}
+        onSaved={invalidateAll}
+      />
 
       <Dialog
         open={!!confirmDisconnect}
